@@ -3,42 +3,44 @@
 #include<fstream>
 #define LENMEMBER sizeof(member)
 #define LENGOODS sizeof(goods)
+#define LENSHOPPINGCARD sizeof(shoppingCard)
 using namespace std;
-class Settlement					//结算
+
+struct goods{					//商品数据库struct
+	long identifi;
+	string name;
+	string orgin;
+	float price;
+	goods *next;
+};
+
+class Settlement					//结算类
 {
 public:
 	void getProduct();
-	void countPrice();
+	void countPrice_cash();
+	void countPrice_visa();
+	void countPrice_card();
 	Settlement();
-protected:
-	struct goods{					//商品数据库
-		long identifi;
-		string name;
-		string orgin;
-		float price;
-		goods *left;
-		goods *right;
-	};
 };
-void Settlement::getProduct()			//得到商品信息
+void Settlement::getProduct()			//得到商品信息函数
 {
-	cout << "Please input product number";
-	cin >> product.identifi;
-
-
-}
-class Update						//更新
+	cout << "Please input product Identification";
+	long _identifi;
+	cin >> _identifi;
+	}
+class Update						//更新数据库类
 {
 public:
-	void inputPrduct();
+	struct goods* inputPrduct();
 	struct member* inputMember();
-	void inputShoppingcard();
+	struct shoppingCard* inputShoppingcard();
 	void addProduct();
 	void addMember();
 	void deleteProduct();
 	void deleteMember();
 protected:
-	struct member{					//会员数据库
+	struct member{					//会员数据库struct
 		string name;
 		string sex;
 		long phoneNumber;
@@ -46,24 +48,23 @@ protected:
 		int point;
 		member *next;
 	};
-
-	struct shoppingCard{			//购物卡数据库
+	struct shoppingCard{			//购物卡数据库struct
 		long identifi;
 		float balance;
-		shoppingCard *left;
-		shoppingCard *right;
-	}shopping;
+		shoppingCard *next;
+
+	};
 };
-class MemberSettlement :public Settlement			//会员结算
+class MemberSettlement :public Settlement			//会员结算派生类
 {
 public:
 	void memberGetPrice();
 
 };
-struct member* Update::inputMember()					//导入会员
+struct member* Update::inputMember()					//导入会员函数
 {
 	ifstream infile("member.txt");
-	struct member *p1, *p2;
+	struct member *p1, *p2, *p3;
 	struct member *head;
 	head = NULL;
 	p1 = p2 = (struct member*)malloc(LENMEMBER);
@@ -76,36 +77,104 @@ struct member* Update::inputMember()					//导入会员
 		infile >> p1->point;
 		p2 = (struct member*)malloc(LENMEMBER);
 		p1->next = p2;
+		p3 = p1;
 		p1 = p2;
 	}
+	p3->next = NULL;
+	p1 = p2 = NULL;
+	return (head);					//为何返回值类型与函数声明不匹配
 }
-void Update::inputPrduct()					//导入商品
+struct goods* Update::inputPrduct()					//导入商品函数
 {
-	ifstream("product.txt");
-	goods *p1, *p2;
+	ifstream infile("product.txt");
+	goods *p1, *p2, *p3;
 	goods *head;
 	head = NULL;
 	p1 = p2 = (struct goods*)malloc(LENGOODS);
-
+	head = p1;
+	while (infile >> p1->identifi)
+	{
+		infile >> p1->name;
+		infile >> p1->orgin;
+		infile >> p1->price;
+		p2 = (struct goods*)malloc(LENGOODS);
+		p1->next = p2;
+		p3 = p1;
+		p1 = p2;
+	}
+	p3->next = NULL;
+	p1 = p2 = NULL;
+	return (head);
 }
-void Update::inputShoppingcard()				//导入会员卡信息
+struct shoppingCard* Update::inputShoppingcard()				//导入会员卡信息函数
 {
 	ifstream infile("product.txt");
-	while (infile>>)
+	shoppingCard *p1, *p2,*p3;
+	shoppingCard *head;
+	head = NULL;
+	p1 = p2 = (struct shoppingCard*)malloc(LENSHOPPINGCARD);
+	head = p1;
+	while (infile>>p1->identifi)
+	{
+		infile >> p1->balance;
+		p2 = (struct shoppingCard*)malloc(LENSHOPPINGCARD);
+		p1->next = p2;
+		p3 = p1;
+		p1 = p2;
+	}
+	p3->next = NULL;
+	p1 = p2 = NULL;
+	return (head);
 }
-void Update::addMember()					//新增会员
+void Update::addMember()					//新增会员函数
 {
 
 }
-void Update::addProduct()					//新增铲平
+void Update::addProduct()					//新增产品函数
 {
 
 }
-void Update::deleteMember()					//删除会员
+void Update::deleteMember()					//删除会员函数
 {
 
 }
-void Update::deleteProduct()				//删除商品
+void Update::deleteProduct()				//删除商品函数
 {
 
+}
+int main()
+{
+	cout << "***************************************************" << endl;
+	cout << "****            超市结算系统                   ****" << endl;
+	cout << "****                                           ****" << endl;
+	cout << "***************************************************" << endl;
+	cout << "输入help回车获得帮助信息，输入count进入结算系统" << endl;
+	enum order{help,count,error}_order;
+	string userOrder;
+	cin >> userOrder;
+	if (userOrder == "help")
+		_order = help;
+	if (userOrder == "count")
+		_order = count;
+	else
+		_order = error;
+	switch (_order)
+	{
+	case help:
+	{
+			  cout << "0";
+	}
+		break;
+	case count:
+	{
+			  cout << "1";
+	}
+		break;
+	default:
+	{
+			   cout << "Error";
+	}
+		break;
+	}
+	return 0;
 }
