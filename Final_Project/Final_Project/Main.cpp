@@ -12,13 +12,27 @@ struct goods{					//商品数据库struct
 	float price;
 	goods *next;
 };
+struct member{					//会员数据库struct
+	string name;
+	string sex;
+	long phoneNumber;
+	enum rank{ Regular, Silver, Golden }memRank;
+	int point;
+	member *next;
+};
+struct shoppingCard{			//购物卡数据库struct
+	long identifi;
+	float balance;
+	shoppingCard *next;
+
+};
 class Settlement					//结算类
 {
 public:
 	long double getPrduct(struct goods *p);
 	void pay_cash();
 	void pay_visa();
-	void pay_card();
+	int pay_card(struct shoppingCard *p,double _price);
 	void settleMember();
 };
 long double Settlement::getPrduct(struct goods *p)
@@ -51,34 +65,48 @@ long double Settlement::getPrduct(struct goods *p)
 }
 void Settlement::pay_cash()
 {
-	
-
+	cout << "Please input :";
+	double _price;
+	cin >> _price;
+	cout << "";
 }
 void Settlement::pay_visa()
 {
+	cout << "Please input visa number:";
+	long visaNumber;
+	cin >> visaNumber;
+	cout << "Please input name:";
+	string visaName;
+	cin >> visaName;
 
 }
-void Settlement::pay_card()
+int Settlement::pay_card(struct shoppingCard *p,double _price)
 {
-
+	cout << "Please input shopping card number:";
+	long _shopCardNum;
+	cin >> _shopCardNum;
+	struct shoppingCard *p1, *p2;
+	p1 = p2 = p;
+	for (; p1->identifi != _shopCardNum;)
+	{
+		p1 = p2->next;
+		p2 = p1;
+	}
+	if (p1->balance >= _price)
+	{
+		p1->balance = p1->balance - _price;
+	}
+	else
+	{
+		cout << "Balance has not enough" << endl;
+		return 0;
+	}
+	cout << "Pay completed!" << endl;
+	return 1;
 }
 class Update						//更新数据库类(completed)
 {
-protected:
-	struct member{					//会员数据库struct
-		string name;
-		string sex;
-		long phoneNumber;
-		enum rank{ Regular, Silver, Golden }memRank;
-		int point;
-		member *next;
-	};
-	struct shoppingCard{			//购物卡数据库struct
-		long identifi;
-		float balance;
-		shoppingCard *next;
 
-	};
 public:
 	struct goods* inputPrduct();
 	struct member* inputMember();
