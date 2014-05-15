@@ -15,18 +15,53 @@ struct goods{					//商品数据库struct
 class Settlement					//结算类
 {
 public:
-	void getProduct();
-	void countPrice_cash();
-	void countPrice_visa();
-	void countPrice_card();
-	Settlement();
+	long double getPrduct(struct goods *p);
+	void pay_cash();
+	void pay_visa();
+	void pay_card();
+	void settleMember();
 };
-void Settlement::getProduct()			//得到商品信息函数
+long double Settlement::getPrduct(struct goods *p)
 {
-	cout << "Please input product Identification";
-	long _identifi;
-	cin >> _identifi;
+	struct goods *p1, *p2;
+	p1 = p2 = p;
+	int TotalAmount = 0;
+	long double TotalPrice = 0;
+	while (1)
+	{
+		cout << "Please input product Identification:";
+		long _identifi;
+		cin >> _identifi;
+		cout << "Please input amount:";
+		int _amount = 1;
+		cin >> _amount;
+		for ( ; p1->identifi != _identifi; )
+		{
+			p1 = p2->next;
+			p2 = p1;
+		}
+		cout << "Product name:" << p1->name << "\tProduct orgin:" << p1->orgin << "\tProduct price:" << p1->price << endl;
+		TotalAmount = TotalAmount + _amount;
+		TotalPrice = _amount*p1->price + TotalPrice;
+		if (0 == _identifi)
+			break;
 	}
+	cout << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+	return(TotalPrice);
+}
+void Settlement::pay_cash()
+{
+	
+
+}
+void Settlement::pay_visa()
+{
+
+}
+void Settlement::pay_card()
+{
+
+}
 class Update						//更新数据库类(completed)
 {
 protected:
