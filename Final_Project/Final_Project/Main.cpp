@@ -5,7 +5,6 @@
 #define LENGOODS sizeof(goods)
 #define LENSHOPPINGCARD sizeof(shoppingCard)
 using namespace std;
-
 struct goods{					//商品数据库struct
 	long identifi;
 	string name;
@@ -13,7 +12,6 @@ struct goods{					//商品数据库struct
 	float price;
 	goods *next;
 };
-
 class Settlement					//结算类
 {
 public:
@@ -29,16 +27,8 @@ void Settlement::getProduct()			//得到商品信息函数
 	long _identifi;
 	cin >> _identifi;
 	}
-class Update						//更新数据库类
+class Update						//更新数据库类(completed)
 {
-public:
-	struct goods* inputPrduct();
-	struct member* inputMember();
-	struct shoppingCard* inputShoppingcard();
-	void addProduct();
-	void addMember();
-	void deleteProduct();
-	void deleteMember();
 protected:
 	struct member{					//会员数据库struct
 		string name;
@@ -54,6 +44,15 @@ protected:
 		shoppingCard *next;
 
 	};
+public:
+	struct goods* inputPrduct();
+	struct member* inputMember();
+	struct shoppingCard* inputShoppingcard();
+	void addProduct(struct goods *p);
+	void addMember(struct member *p);
+	int deleteProduct(struct goods *p);
+	int deleteMember(struct member *p);
+
 };
 class MemberSettlement :public Settlement			//会员结算派生类
 {
@@ -125,21 +124,194 @@ struct shoppingCard* Update::inputShoppingcard()				//导入会员卡信息函数
 	p3->next = NULL;
 	p1 = p2 = NULL;
 	return (head);
-}
-void Update::addMember()					//新增会员函数
-{
 
 }
-void Update::addProduct()					//新增产品函数
+void Update::addMember(struct member *p)					//新增会员函数
 {
-
+	struct member *p1,*p2;
+	p1 = p2 = p;
+	while (p1->next != NULL)
+	{
+		p1 = p2->next;
+		p2 = p1;
+	}
+	p1->next = (struct member*)malloc(LENMEMBER);
+	p = p1->next;
+	cout << "Please input new member data";
+	cout << "Please input name:";
+	cin >> p->name;
+	cout << "Please input sex";
+	cin >> p->sex;
+	cout << "Please input phone number";
+	cin >> p->phoneNumber;
+	p->point = 0;
+	p->next = NULL;
+	p1 = p2 = NULL;
 }
-void Update::deleteMember()					//删除会员函数
+void Update::addProduct(struct goods *p)					//新增产品函数
 {
-
+	struct goods *p1, *p2;
+	p1 = p2 = p;
+	while (p1->next != NULL)
+	{
+		p1 = p2->next;
+		p2 = p1;
+	}
+	p1->next = (struct goods*)malloc(LENGOODS);
+	p = p1->next;
+	cout << "Please input new product data";
+	cout << "Please input identification";
+	cin >> p->identifi;
+	cout << "Please input name";
+	cin >> p->name;
+	cout << "Please input orgin";
+	cin >> p->orgin;
+	cout << "Please input price";
+	cin >> p->price;
+	p->next = NULL;
+	p1 = p2 = NULL;
 }
-void Update::deleteProduct()				//删除商品函数
+int Update::deleteMember(struct member *p)					//删除会员函数
 {
+	struct member *p1, *p2, *p3;
+	p1 = p2 = p3 = p;
+	cout << "Please input delete member name";
+	string d_name;
+	cin >> d_name;
+	cout << "Please input delete member phone number";
+	long d_phoneNumber;
+	cin >> d_phoneNumber;
+	cout << "Warning,data will be deleted!Input no will be stopped";
+	string order;
+	cin >> order;
+	if ("no" == order)
+	{
+		cout << "All has stopped";
+		return 1;
+
+	}
+	else
+	{
+		int i = 0;
+		for ( ; p1->name != d_name;i++)
+		{
+			if (0 == i)
+			{
+				p1 = p2->next;
+				p2 = p1;
+			}
+			else
+			{
+				p3 = p1;
+				p1 = p2->next;
+				p2 = p1;
+			}
+		}
+		if (0 == i||NULL==p1->next)
+		{
+			if (0==i&&p1->phoneNumber == d_phoneNumber)
+			{
+				p2 = p3 = p1->next;
+				free(p1);
+				p1 = p = NULL;
+			}
+			if (NULL == p1->next&&p1->phoneNumber == d_phoneNumber)
+			{
+				free(p1);
+				p3->next = NULL;
+				p1 = p2 = NULL;
+			}
+			else
+			{
+				cout << "Input member data is wrong!" << endl;
+			}
+		}
+		else
+		{
+			if (p1->phoneNumber == d_phoneNumber)
+			{
+				p3->next = p1->next;
+				free(p1);//释放内存
+				p1 = p2 = NULL;
+			}
+			else
+			{
+				cout << "Input member data is wrong!" << endl;
+			}
+		}
+
+	}
+}
+int Update::deleteProduct(struct goods *p)				//删除商品函数
+{
+	struct goods *p1, *p2, *p3;
+	p1 = p2 = p3 = p;
+	cout << "Please input delete product identification";
+	long d_identifi;
+	cin >> d_identifi;
+	cout << "Please input delete product name";
+	string d_name;
+	cin >> d_name;
+	cout << "Warning,data will be deleted!Input no will be stopped";
+	string order;
+	cin >> order;
+	if ("no" == order)
+	{
+		cout << "All has stopped";
+		return 1;
+
+	}
+	else
+	{
+		int i = 0;
+		for (; p1->identifi != d_identifi; i++)
+		{
+			if (0 == i)
+			{
+				p1 = p2->next;
+				p2 = p1;
+			}
+			else
+			{
+				p3 = p1;
+				p1 = p2->next;
+				p2 = p1;
+			}
+		}
+		if (0 == i || NULL == p1->next)
+		{
+			if (0 == i&&p1->name == d_name)
+			{
+				p2 = p3 = p1->next;
+				free(p1);
+				p1 = p = NULL;
+			}
+			if (NULL == p1->next&&p1->name == d_name)
+			{
+				free(p1);
+				p3->next = NULL;
+				p1 = p2 = NULL;
+			}
+			else
+			{
+				cout << "Input product data is wrong!" << endl;
+			}
+		}
+		else
+		{
+			if (p1->name == d_name)
+			{
+				p3->next = p1->next;
+				free(p1);//释放内存
+				p1 = p2 = NULL;
+			}
+			else
+			{
+				cout << "Input product data is wrong!" << endl;
+			}
+		}
+
+	}
 
 }
 int main()
