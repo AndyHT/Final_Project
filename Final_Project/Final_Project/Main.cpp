@@ -1,6 +1,5 @@
 //未完成部分：会员结算，多次结算
 //需修改内容：struct的封装
-//Bug:enum如何使用
 #include<iostream>
 #include<string>
 #include<fstream>
@@ -19,7 +18,7 @@ struct member{					//会员数据库struct
 	string name;
 	string sex;
 	long phoneNumber;
-	enum rank{ Regular, Silver, Golden }memRank;
+	string memRank;
 	int point;
 	member *next;
 };
@@ -33,25 +32,29 @@ class Payment					//结算类
 {
 public:
 	double getPrduct(struct goods *p);
-	int pay_cash(double _price);
-	int pay_visa(double _price);
-	int pay_card(struct shoppingCard *p,double _price);
+	int pay_cash(float _price);
+	int pay_visa(float _price);
+	int pay_card(struct shoppingCard *p,float _price);
 	void settleMember();
 };
 double Payment::getPrduct(struct goods *p)
 {
-	ofstream fileCalendar;
-	fileCalendar.open("calendar.txt", ios::out, 0);
+	ofstream fileCalendar("calendar.txt");
 	fileCalendar << "Expense Calendar" << endl;
 	struct goods *p1, *p2;
 	p1 = p2 = p;
 	int TotalAmount = 0;
-	long double TotalPrice = 0;
+	float TotalPrice = 0;
 	while (1)
 	{
 		cout << "Please input product Identification:";
 		long _identifi;
 		cin >> _identifi;
+		if (0 == _identifi)
+		{
+			cout << "All products are record" << endl;
+			break;
+		}
 		cout << "Please input amount:";
 		int _amount = 1;
 		cin >> _amount;
@@ -72,19 +75,19 @@ double Payment::getPrduct(struct goods *p)
 	fileCalendar.close();
 	return(TotalPrice);
 }
-int Payment::pay_cash(double _price)
+int Payment::pay_cash(float _price)
 {
 	cout << "Please intput the payment amount:";
 	double _pay;
 	cin >> _pay;
-	if (_pay - _price < 0)
+	if (_pay - _price < 0.0)
 	{
 		return 0;
 	}
 	cout << "The change:" << _pay - _price << endl;
 	return 1;
 }
-int Payment::pay_visa(double _price)//未完成！！！
+int Payment::pay_visa(float _price)
 {
 	cout << "Please input visa number:";
 	long visaNumber;
@@ -92,9 +95,10 @@ int Payment::pay_visa(double _price)//未完成！！！
 	cout << "Please input name:";
 	string visaName;
 	cin >> visaName;
-
+	cout << "Pay completed" << endl;
+	return 1;
 }
-int Payment::pay_card(struct shoppingCard *p,double _price)
+int Payment::pay_card(struct shoppingCard *p,float _price)
 {
 	cout << "Please input shopping card number:";
 	long _shopCardNum;
@@ -140,20 +144,19 @@ public:
 };//未完成！！！
 struct member* Update::inputMember()					//导入会员函数
 {
-	ifstream fileMember;
-	fileMember.open("member.txt", ios::in, 1);
+	ifstream fileMember("member.txt");
 	struct member *p1, *p2, *p3;
 	struct member *head;
-	head = NULL;
-	p1 = p2 = (struct member*)malloc(LENMEMBER);
+	head = p3 = NULL;
+	p1 = p2 = new member;
 	head = p1;
 	while (fileMember>>p1->name)
 	{
 		fileMember >> p1->sex;
 		fileMember >> p1->phoneNumber;
-		fileMember >> p1->memRank;   //enum如何使用！！！
+		fileMember >> p1->memRank;
 		fileMember >> p1->point;
-		p2 = (struct member*)malloc(LENMEMBER);
+		p2 = new member;
 		p1->next = p2;
 		p3 = p1;
 		p1 = p2;
@@ -165,19 +168,18 @@ struct member* Update::inputMember()					//导入会员函数
 }
 struct goods* Update::inputPrduct()					//导入商品函数
 {
-	ifstream fileProduct;
-	fileProduct.open("product.txt", ios::in, 1);
+	ifstream fileProduct("product.txt");
 	goods *p1, *p2, *p3;
 	goods *head;
-	head = NULL;
-	p1 = p2 = (struct goods*)malloc(LENGOODS);
+	head = p3 = NULL;
+	p1 = p2 = new goods;
 	head = p1;
 	while (fileProduct >> p1->identifi)
 	{
 		fileProduct >> p1->name;
 		fileProduct >> p1->orgin;
 		fileProduct >> p1->price;
-		p2 = (struct goods*)malloc(LENGOODS);
+		p2 = new goods;
 		p1->next = p2;
 		p3 = p1;
 		p1 = p2;
@@ -189,17 +191,16 @@ struct goods* Update::inputPrduct()					//导入商品函数
 }
 struct shoppingCard* Update::inputShoppingcard()				//导入会员卡信息函数
 {
-	ifstream fileCard;
-	fileCard.open("shoppingcard.txt", ios::in, 1);
+	ifstream fileCard("shoppingcard.txt");
 	shoppingCard *p1, *p2,*p3;
 	shoppingCard *head;
-	head = NULL;
-	p1 = p2 = (struct shoppingCard*)malloc(LENSHOPPINGCARD);
+	head = p3 = NULL;
+	p1 = p2 = new shoppingCard;
 	head = p1;
 	while (fileCard >> p1->identifi)
 	{
 		fileCard >> p1->balance;
-		p2 = (struct shoppingCard*)malloc(LENSHOPPINGCARD);
+		p2 = new shoppingCard;
 		p1->next = p2;
 		p3 = p1;
 		p1 = p2;
@@ -218,7 +219,7 @@ void Update::addMember(struct member *p)					//新增会员函数
 		p1 = p2->next;
 		p2 = p1;
 	}
-	p1->next = (struct member*)malloc(LENMEMBER);
+	p1->next = new member;
 	p = p1->next;
 	cout << "Please input new member data";
 	cout << "Please input name:";
@@ -240,7 +241,7 @@ void Update::addProduct(struct goods *p)					//新增产品函数
 		p1 = p2->next;
 		p2 = p1;
 	}
-	p1->next = (struct goods*)malloc(LENGOODS);
+	p1->next = new goods;
 	p = p1->next;
 	cout << "Please input new product data";
 	cout << "Please input identification";
@@ -295,18 +296,21 @@ int Update::deleteMember(struct member *p)					//删除会员函数
 			if (0==i&&p1->phoneNumber == d_phoneNumber)
 			{
 				p2 = p3 = p1->next;
-				free(p1);
+				delete p1;
 				p1 = p = NULL;
+				return 1;
 			}
 			if (NULL == p1->next&&p1->phoneNumber == d_phoneNumber)
 			{
-				free(p1);
+				delete p1;
 				p3->next = NULL;
 				p1 = p2 = NULL;
+				return 1;
 			}
 			else
 			{
 				cout << "Input member data is wrong!" << endl;
+				return 0;
 			}
 		}
 		else
@@ -314,12 +318,14 @@ int Update::deleteMember(struct member *p)					//删除会员函数
 			if (p1->phoneNumber == d_phoneNumber)
 			{
 				p3->next = p1->next;
-				free(p1);//释放内存
+				delete p1;//释放内存
 				p1 = p2 = NULL;
+				return 1;
 			}
 			else
 			{
 				cout << "Input member data is wrong!" << endl;
+				return 0;
 			}
 		}
 
@@ -340,7 +346,7 @@ int Update::deleteProduct(struct goods *p)				//删除商品函数
 	cin >> order;
 	if ("no" == order)
 	{
-		cout << "All has stopped";
+		cout << "All has stopped" << endl;
 		return 1;
 
 	}
@@ -366,18 +372,21 @@ int Update::deleteProduct(struct goods *p)				//删除商品函数
 			if (0 == i&&p1->name == d_name)
 			{
 				p2 = p3 = p1->next;
-				free(p1);
+				delete p1;
 				p1 = p = NULL;
+				return 1;
 			}
 			if (NULL == p1->next&&p1->name == d_name)
 			{
-				free(p1);
+				delete p1;
 				p3->next = NULL;
 				p1 = p2 = NULL;
+				return 1;
 			}
 			else
 			{
 				cout << "Input product data is wrong!" << endl;
+				return 0;
 			}
 		}
 		else
@@ -385,12 +394,14 @@ int Update::deleteProduct(struct goods *p)				//删除商品函数
 			if (p1->name == d_name)
 			{
 				p3->next = p1->next;
-				free(p1);//释放内存
+				delete p1;//释放内存
 				p1 = p2 = NULL;
+				return 1;
 			}
 			else
 			{
 				cout << "Input product data is wrong!" << endl;
+				return 0;
 			}
 		}
 
@@ -404,9 +415,9 @@ int main()
 	cout << "****                                           ****" << endl;
 	cout << "***************************************************" << endl;
 	Update update;
-	member* p_member;
-	goods* p_goods;
-	shoppingCard* p_shopCard;
+	member* p_member = NULL;
+	goods* p_goods = NULL;
+	shoppingCard* p_shopCard = NULL;
 	p_member=update.inputMember();
 	p_goods=update.inputPrduct();
 	p_shopCard=update.inputShoppingcard();
@@ -430,9 +441,9 @@ int main()
 	case count:
 	{
 	    		  Payment payMent;
-				  double dou_price;
+				  float f_price;
 				  int judgement;
-				  dou_price=payMent.getPrduct(p_goods);
+				  f_price=payMent.getPrduct(p_goods);
 				  cout << "Please input the method of payment:";
 				  enum payMethod{cash,visa,card,error}payMeth;
 				  cin >> userOrder;
@@ -454,7 +465,7 @@ int main()
 				  {
 				  case cash:
 				  {
-							   judgement=payMent.pay_cash;
+							   judgement=payMent.pay_cash(f_price);
 							   if (0 == judgement)
 							   {
 								   cout << "Cash pay failure" << endl;
@@ -463,7 +474,7 @@ int main()
 					  break;
 				  case visa:
 				  {
-							   judgement=payMent.pay_visa(dou_price);
+							   judgement=payMent.pay_visa(f_price);
 							   if (0 == judgement)
 							   {
 								   cout << "Visa pay failure" << endl;
@@ -473,16 +484,16 @@ int main()
 					  break;
 				  case card:
 				  {
-							   judgement = payMent.pay_card(p_shopCard, dou_price);
+							   judgement = payMent.pay_card(p_shopCard, f_price);
 							   if (0 == judgement)
 							   {
 								   cout << "Shoppingcard pay fauilure" << endl;
 							   }
 				  }
 					  break;
-				  case error:
+				  default:
 				  {
-								cout << "Error" << endl;
+								cout << "Error input" << endl;
 				  }
 					  break;
 				  }

@@ -1,0 +1,3 @@
+Expense Calendar
+Product name:nangua	Product orgin:shanghai	Product price:2
+Total product amount:2	Total price:4
