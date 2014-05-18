@@ -1,3 +1,6 @@
+//未完成部分：会员结算，多次结算
+//需修改内容：struct的封装
+//Bug:enum如何使用
 #include<iostream>
 #include<string>
 #include<fstream>
@@ -26,17 +29,20 @@ struct shoppingCard{			//购物卡数据库struct
 	shoppingCard *next;
 
 };
-class Settlement					//结算类
+class Payment					//结算类
 {
 public:
-	long double getPrduct(struct goods *p);
-	void pay_cash();
-	void pay_visa();
+	double getPrduct(struct goods *p);
+	int pay_cash(double _price);
+	int pay_visa(double _price);
 	int pay_card(struct shoppingCard *p,double _price);
 	void settleMember();
 };
-long double Settlement::getPrduct(struct goods *p)
+double Payment::getPrduct(struct goods *p)
 {
+	ofstream fileCalendar;
+	fileCalendar.open("calendar.txt", ios::out, 0);
+	fileCalendar << "Expense Calendar" << endl;
 	struct goods *p1, *p2;
 	p1 = p2 = p;
 	int TotalAmount = 0;
@@ -55,22 +61,30 @@ long double Settlement::getPrduct(struct goods *p)
 			p2 = p1;
 		}
 		cout << "Product name:" << p1->name << "\tProduct orgin:" << p1->orgin << "\tProduct price:" << p1->price << endl;
+		fileCalendar << "Product name:" << p1->name << "\tProduct orgin:" << p1->orgin << "\tProduct price:" << p1->price << endl;
 		TotalAmount = TotalAmount + _amount;
 		TotalPrice = _amount*p1->price + TotalPrice;
 		if (0 == _identifi)
 			break;
 	}
 	cout << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+	fileCalendar << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+	fileCalendar.close();
 	return(TotalPrice);
 }
-void Settlement::pay_cash()
+int Payment::pay_cash(double _price)
 {
-	cout << "Please input :";
-	double _price;
-	cin >> _price;
-	cout << "";
+	cout << "Please intput the payment amount:";
+	double _pay;
+	cin >> _pay;
+	if (_pay - _price < 0)
+	{
+		return 0;
+	}
+	cout << "The change:" << _pay - _price << endl;
+	return 1;
 }
-void Settlement::pay_visa()
+int Payment::pay_visa(double _price)//未完成！！！
 {
 	cout << "Please input visa number:";
 	long visaNumber;
@@ -80,7 +94,7 @@ void Settlement::pay_visa()
 	cin >> visaName;
 
 }
-int Settlement::pay_card(struct shoppingCard *p,double _price)
+int Payment::pay_card(struct shoppingCard *p,double _price)
 {
 	cout << "Please input shopping card number:";
 	long _shopCardNum;
@@ -99,6 +113,7 @@ int Settlement::pay_card(struct shoppingCard *p,double _price)
 	else
 	{
 		cout << "Balance has not enough" << endl;
+		cout << "Please chance other method to pay" << endl;
 		return 0;
 	}
 	cout << "Pay completed!" << endl;
@@ -117,26 +132,27 @@ public:
 	int deleteMember(struct member *p);
 
 };
-class MemberSettlement :public Settlement			//会员结算派生类
+class MemberSettlement :public Payment			//会员结算派生类
 {
 public:
 	void memberGetPrice();
 
-};
+};//未完成！！！
 struct member* Update::inputMember()					//导入会员函数
 {
-	ifstream infile("member.txt");
+	ifstream fileMember;
+	fileMember.open("member.txt", ios::in, 1);
 	struct member *p1, *p2, *p3;
 	struct member *head;
 	head = NULL;
 	p1 = p2 = (struct member*)malloc(LENMEMBER);
 	head = p1;
-	while (infile>>p1->name)
+	while (fileMember>>p1->name)
 	{
-		infile >> p1->sex;
-		infile >> p1->phoneNumber;
-		infile >> p1->memRank;
-		infile >> p1->point;
+		fileMember >> p1->sex;
+		fileMember >> p1->phoneNumber;
+		fileMember >> p1->memRank;   //enum如何使用！！！
+		fileMember >> p1->point;
 		p2 = (struct member*)malloc(LENMEMBER);
 		p1->next = p2;
 		p3 = p1;
@@ -144,21 +160,23 @@ struct member* Update::inputMember()					//导入会员函数
 	}
 	p3->next = NULL;
 	p1 = p2 = NULL;
-	return (head);					//为何返回值类型与函数声明不匹配
+	fileMember.close();
+	return (head);
 }
 struct goods* Update::inputPrduct()					//导入商品函数
 {
-	ifstream infile("product.txt");
+	ifstream fileProduct;
+	fileProduct.open("product.txt", ios::in, 1);
 	goods *p1, *p2, *p3;
 	goods *head;
 	head = NULL;
 	p1 = p2 = (struct goods*)malloc(LENGOODS);
 	head = p1;
-	while (infile >> p1->identifi)
+	while (fileProduct >> p1->identifi)
 	{
-		infile >> p1->name;
-		infile >> p1->orgin;
-		infile >> p1->price;
+		fileProduct >> p1->name;
+		fileProduct >> p1->orgin;
+		fileProduct >> p1->price;
 		p2 = (struct goods*)malloc(LENGOODS);
 		p1->next = p2;
 		p3 = p1;
@@ -166,19 +184,21 @@ struct goods* Update::inputPrduct()					//导入商品函数
 	}
 	p3->next = NULL;
 	p1 = p2 = NULL;
+	fileProduct.close();
 	return (head);
 }
 struct shoppingCard* Update::inputShoppingcard()				//导入会员卡信息函数
 {
-	ifstream infile("product.txt");
+	ifstream fileCard;
+	fileCard.open("shoppingcard.txt", ios::in, 1);
 	shoppingCard *p1, *p2,*p3;
 	shoppingCard *head;
 	head = NULL;
 	p1 = p2 = (struct shoppingCard*)malloc(LENSHOPPINGCARD);
 	head = p1;
-	while (infile>>p1->identifi)
+	while (fileCard >> p1->identifi)
 	{
-		infile >> p1->balance;
+		fileCard >> p1->balance;
 		p2 = (struct shoppingCard*)malloc(LENSHOPPINGCARD);
 		p1->next = p2;
 		p3 = p1;
@@ -186,8 +206,8 @@ struct shoppingCard* Update::inputShoppingcard()				//导入会员卡信息函数
 	}
 	p3->next = NULL;
 	p1 = p2 = NULL;
+	fileCard.close();
 	return (head);
-
 }
 void Update::addMember(struct member *p)					//新增会员函数
 {
@@ -383,6 +403,13 @@ int main()
 	cout << "****            超市结算系统                   ****" << endl;
 	cout << "****                                           ****" << endl;
 	cout << "***************************************************" << endl;
+	Update update;
+	member* p_member;
+	goods* p_goods;
+	shoppingCard* p_shopCard;
+	p_member=update.inputMember();
+	p_goods=update.inputPrduct();
+	p_shopCard=update.inputShoppingcard();
 	cout << "输入help回车获得帮助信息，输入count进入结算系统" << endl;
 	enum order{help,count,error}_order;
 	string userOrder;
@@ -402,14 +429,72 @@ int main()
 		break;
 	case count:
 	{
-			  cout << "1";
+	    		  Payment payMent;
+				  double dou_price;
+				  int judgement;
+				  dou_price=payMent.getPrduct(p_goods);
+				  cout << "Please input the method of payment:";
+				  enum payMethod{cash,visa,card,error}payMeth;
+				  cin >> userOrder;
+				  if ("cash" == userOrder)
+				  {
+					  payMeth = cash;
+				  }
+				  if ("visa" == userOrder)
+				  {
+					  payMeth = visa;
+				  }
+				  if ("card" == userOrder)
+				  {
+					  payMeth = card;
+				  }
+				  else
+					  payMeth = error;
+				  switch (payMeth)
+				  {
+				  case cash:
+				  {
+							   judgement=payMent.pay_cash;
+							   if (0 == judgement)
+							   {
+								   cout << "Cash pay failure" << endl;
+							   }
+				  }
+					  break;
+				  case visa:
+				  {
+							   judgement=payMent.pay_visa(dou_price);
+							   if (0 == judgement)
+							   {
+								   cout << "Visa pay failure" << endl;
+							   }
+							   
+				  }
+					  break;
+				  case card:
+				  {
+							   judgement = payMent.pay_card(p_shopCard, dou_price);
+							   if (0 == judgement)
+							   {
+								   cout << "Shoppingcard pay fauilure" << endl;
+							   }
+				  }
+					  break;
+				  case error:
+				  {
+								cout << "Error" << endl;
+				  }
+					  break;
+				  }
 	}
 		break;
 	default:
 	{
-			   cout << "Error";
+			   cout << " Input error" << endl;
 	}
 		break;
 	}
+	cout << "There is your expense calendar:" << endl;
+	system("calendar.txt");
 	return 0;
 }
