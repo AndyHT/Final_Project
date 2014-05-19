@@ -1,8 +1,9 @@
-//未完成部分：会员结算，多次结算
+//未完成部分：多次结算有问题；二叉树
 //需修改内容：struct的封装
 #include<iostream>
 #include<string>
 #include<fstream>
+#include<vector>
 #define LENMEMBER sizeof(member)
 #define LENGOODS sizeof(goods)
 #define LENSHOPPINGCARD sizeof(shoppingCard)
@@ -15,6 +16,7 @@ struct goods{					//商品数据库struct
 	goods *next;
 };
 struct member{					//会员数据库struct
+	int memNumber;//新增会员编号
 	string name;
 	string sex;
 	long phoneNumber;
@@ -31,13 +33,13 @@ struct shoppingCard{			//购物卡数据库struct
 class Payment					//结算类
 {
 public:
-	double getPrduct(struct goods *p);
+	float getPrduct(struct goods *p);
 	int pay_cash(float _price);
 	int pay_visa(float _price);
 	int pay_card(struct shoppingCard *p,float _price);
 	void settleMember();
 };
-double Payment::getPrduct(struct goods *p)
+float Payment::getPrduct(struct goods *p)
 {
 	ofstream fileCalendar("calendar.txt");
 	fileCalendar << "Expense Calendar" << endl;
@@ -45,10 +47,10 @@ double Payment::getPrduct(struct goods *p)
 	p1 = p2 = p;
 	int TotalAmount = 0;
 	float TotalPrice = 0;
+	long _identifi;
 	while (1)
 	{
 		cout << "Please input product Identification:";
-		long _identifi;
 		cin >> _identifi;
 		if (0 == _identifi)
 		{
@@ -67,8 +69,6 @@ double Payment::getPrduct(struct goods *p)
 		fileCalendar << "Product name:" << p1->name << "\tProduct orgin:" << p1->orgin << "\tProduct price:" << p1->price << endl;
 		TotalAmount = TotalAmount + _amount;
 		TotalPrice = _amount*p1->price + TotalPrice;
-		if (0 == _identifi)
-			break;
 	}
 	cout << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
 	fileCalendar << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
@@ -125,7 +125,6 @@ int Payment::pay_card(struct shoppingCard *p,float _price)
 }
 class Update						//更新数据库类(completed)
 {
-
 public:
 	struct goods* inputPrduct();
 	struct member* inputMember();
@@ -134,14 +133,162 @@ public:
 	void addMember(struct member *p);
 	int deleteProduct(struct goods *p);
 	int deleteMember(struct member *p);
-
 };
-class MemberSettlement :public Payment			//会员结算派生类
+class MemberPayment :public Payment			//会员结算派生类
 {
 public:
-	void memberGetPrice();
+	float memberGetPrice(struct member *p_mem, struct goods *p_goods);
 
 };//未完成！！！
+float MemberPayment::memberGetPrice(struct member *p_mem,struct goods *p_goods)
+{
+	cout << "Please input your member number";
+	int _memNum;
+	cin >> _memNum;
+	struct member *p_m1, *p_m2;
+	struct goods *p_g1, *p_g2;
+	int TotalAmount = 0;
+	float TotalPrice = 0;
+	ofstream fileCalendar("calendar.txt");
+	fileCalendar << "Expense Calendar(regular)" << endl;
+	p_m1 = p_m2 = p_mem;
+	p_g1 = p_g2 = p_goods;
+	while (_memNum!=p_m1->memNumber||NULL==p_m1)
+	{
+		p_m1 = p_m2->next;
+		p_m2 = p_m1;
+	}
+	if (NULL == p_m1)
+	{
+		cout << "Member number input error" << endl;
+	}
+	if ("regular" == p_m1->memRank)
+	{
+		long _identifi;
+		while (1)
+		{
+			cout << "Method of pay:regular" << endl;
+			cout << "Please input product Identification:";
+			cin >> _identifi;
+			if (0 == _identifi)
+			{
+				cout << "All products are record" << endl;
+				break;
+			}
+			cout << "Please input amount:";
+			int _amount = 1;
+			cin >> _amount;
+			for (; p_g1->identifi != _identifi;)
+			{
+				p_g1 = p_g2->next;
+				p_g2 = p_g1;
+			}
+			cout << "Product name:" << p_g1->name << "\tProduct orgin:" << p_g1->orgin << "\tProduct price:" << p_g1->price << endl;
+			fileCalendar << "Product name:" << p_g1->name << "\tProduct orgin:" << p_g1->orgin << "\tProduct price:" << p_g1->price << endl;
+			TotalAmount = TotalAmount + _amount;
+			TotalPrice = _amount*p_g1->price + TotalPrice;
+		}
+		if (TotalPrice > 2000 && TotalPrice <= 5000)
+		{
+			TotalPrice = (TotalPrice - 2000)*0.95 + 2000;
+		}
+		if (TotalPrice > 5000)
+		{
+			TotalPrice = (TotalPrice - 5000)*0.9 + 5000;
+		}
+		else
+		{
+			;
+		}
+		cout << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+		fileCalendar << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+		fileCalendar.close();
+		return(TotalPrice);
+	}
+	if ("silver" == p_m1->memRank)
+	{
+		long _identifi;
+		while (1)
+		{
+			cout << "Method of pay:silver" << endl;
+			cout << "Please input product Identification:";
+			cin >> _identifi;
+			if (0 == _identifi)
+			{
+				cout << "All products are record" << endl;
+				break;
+			}
+			cout << "Please input amount:";
+			int _amount = 1;
+			cin >> _amount;
+			for (; p_g1->identifi != _identifi;)
+			{
+				p_g1 = p_g2->next;
+				p_g2 = p_g1;
+			}
+			cout << "Product name:" << p_g1->name << "\tProduct orgin:" << p_g1->orgin << "\tProduct price:" << p_g1->price << endl;
+			fileCalendar << "Product name:" << p_g1->name << "\tProduct orgin:" << p_g1->orgin << "\tProduct price:" << p_g1->price << endl;
+			TotalAmount = TotalAmount + _amount;
+			TotalPrice = _amount*p_g1->price + TotalPrice;
+		}
+		if (TotalPrice > 1000 && TotalPrice<2000)
+		{
+			TotalPrice = (TotalPrice - 1000)*0.9 + 1000;
+		}
+		if (TotalPrice > 2000)
+		{
+			TotalPrice = (TotalPrice - 2000)*0.85 + 2000;
+		}
+		else
+		{
+			TotalPrice = TotalPrice*0.95;
+		}
+		cout << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+		fileCalendar << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+		fileCalendar.close();
+		return(TotalPrice);
+	}
+	if ("gold" == p_m1->memRank)
+	{
+		long _identifi;
+		while (1)
+		{
+			cout << "Method of pay:gold" << endl;
+			cout << "Please input product Identification:";
+			cin >> _identifi;
+			if (0 == _identifi)
+			{
+				cout << "All products are record" << endl;
+				break;
+			}
+			cout << "Please input amount:";
+			int _amount = 1;
+			cin >> _amount;
+			for (; p_g1->identifi != _identifi;)
+			{
+				p_g1 = p_g2->next;
+				p_g2 = p_g1;
+			}
+			cout << "Product name:" << p_g1->name << "\tProduct orgin:" << p_g1->orgin << "\tProduct price:" << p_g1->price << endl;
+			fileCalendar << "Product name:" << p_g1->name << "\tProduct orgin:" << p_g1->orgin << "\tProduct price:" << p_g1->price << endl;
+			TotalAmount = TotalAmount + _amount;
+			if (p_g1->price > 10 && p_g1->price < 20)
+			{
+				TotalPrice = _amount*p_g1->price*0.95 + TotalPrice;
+			}
+			if (p_g1->price>20)
+			{
+				TotalPrice = _amount*p_g1->price*0.9 + TotalPrice;
+			}
+			else
+				TotalPrice = _amount*p_g1->price + TotalPrice;
+		}
+		cout << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+		fileCalendar << "Total product amount:" << TotalAmount << "\tTotal price:" << TotalPrice << endl;
+		fileCalendar.close();
+		return(TotalPrice);
+	}
+}
 struct member* Update::inputMember()					//导入会员函数
 {
 	ifstream fileMember("member.txt");
@@ -156,6 +303,7 @@ struct member* Update::inputMember()					//导入会员函数
 		fileMember >> p1->phoneNumber;
 		fileMember >> p1->memRank;
 		fileMember >> p1->point;
+		fileMember >> p1->memNumber;
 		p2 = new member;
 		p1->next = p2;
 		p3 = p1;
@@ -188,6 +336,7 @@ struct goods* Update::inputPrduct()					//导入商品函数
 	p1 = p2 = NULL;
 	fileProduct.close();
 	return (head);
+	
 }
 struct shoppingCard* Update::inputShoppingcard()				//导入会员卡信息函数
 {
@@ -228,6 +377,7 @@ void Update::addMember(struct member *p)					//新增会员函数
 	cin >> p->sex;
 	cout << "Please input phone number";
 	cin >> p->phoneNumber;
+	//需要生成一个会员编号
 	p->point = 0;
 	p->next = NULL;
 	p1 = p2 = NULL;
@@ -408,7 +558,7 @@ int Update::deleteProduct(struct goods *p)				//删除商品函数
 	}
 
 }
-int main()
+int main()//会员结算还未插入
 {
 	cout << "***************************************************" << endl;
 	cout << "****            超市结算系统                   ****" << endl;
@@ -440,63 +590,69 @@ int main()
 		break;
 	case count:
 	{
-	    		  Payment payMent;
-				  float f_price;
-				  int judgement;
-				  f_price=payMent.getPrduct(p_goods);
-				  cout << "Please input the method of payment:";
-				  enum payMethod{cash,visa,card,error}payMeth;
-				  cin >> userOrder;
-				  if ("cash" == userOrder)
+				  while (1)
 				  {
-					  payMeth = cash;
+					  Payment payMent;
+					  float f_price;
+					  int judgement;
+					  f_price = payMent.getPrduct(p_goods);
+					  cout << "Please input the method of payment:";
+					  enum payMethod{ cash, visa, card, error }payMeth;
+					  cin >> userOrder;
+					  if ("0" == userOrder)
+						  break;
+					  if ("cash" == userOrder)
+					  {
+						  payMeth = cash;
+					  }
+					  if ("visa" == userOrder)
+					  {
+						  payMeth = visa;
+					  }
+					  if ("card" == userOrder)
+					  {
+						  payMeth = card;
+					  }
+					  else
+						  payMeth = error;
+					  switch (payMeth)
+					  {
+					  case cash:
+					  {
+								   judgement = payMent.pay_cash(f_price);
+								   if (0 == judgement)
+								   {
+									   cout << "Cash pay failure" << endl;
+								   }
+					  }
+						  break;
+					  case visa:
+					  {
+								   judgement = payMent.pay_visa(f_price);
+								   if (0 == judgement)
+								   {
+									   cout << "Visa pay failure" << endl;
+								   }
+
+					  }
+						  break;
+					  case card:
+					  {
+								   judgement = payMent.pay_card(p_shopCard, f_price);
+								   if (0 == judgement)
+								   {
+									   cout << "Shoppingcard pay fauilure" << endl;
+								   }
+					  }
+						  break;
+					  default:
+					  {
+								 cout << "Error input" << endl;
+					  }
+						  break;
+					  }
 				  }
-				  if ("visa" == userOrder)
-				  {
-					  payMeth = visa;
-				  }
-				  if ("card" == userOrder)
-				  {
-					  payMeth = card;
-				  }
-				  else
-					  payMeth = error;
-				  switch (payMeth)
-				  {
-				  case cash:
-				  {
-							   judgement=payMent.pay_cash(f_price);
-							   if (0 == judgement)
-							   {
-								   cout << "Cash pay failure" << endl;
-							   }
-				  }
-					  break;
-				  case visa:
-				  {
-							   judgement=payMent.pay_visa(f_price);
-							   if (0 == judgement)
-							   {
-								   cout << "Visa pay failure" << endl;
-							   }
-							   
-				  }
-					  break;
-				  case card:
-				  {
-							   judgement = payMent.pay_card(p_shopCard, f_price);
-							   if (0 == judgement)
-							   {
-								   cout << "Shoppingcard pay fauilure" << endl;
-							   }
-				  }
-					  break;
-				  default:
-				  {
-								cout << "Error input" << endl;
-				  }
-					  break;
-				  }
+	    		  
 	}
 		break;
 	default:
