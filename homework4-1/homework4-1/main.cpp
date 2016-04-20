@@ -9,8 +9,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cctype>
 #include <vector>
+#include <iterator>
 #include <set>
 
 using namespace std;
@@ -35,14 +35,22 @@ bool compareFre(const Word &x, const Word &y) {
 }
 
 int main(int argc, const char * argv[]) {
-    string path;
-//    cin>>path;
-    path = "/Users/huoteng/Desktop/test.txt";//for test
-    ifstream inputFile(path);
-    if (!inputFile) {
-        cout << "不可以打开文件" << endl;
-        exit(1);
+    
+    ifstream exclusionFile("exclusion.txt");
+    set<string> exclusionWords;
+    string exclusionWord;
+    while (exclusionFile>>exclusionWord) {
+        exclusionWords.insert(exclusionWord);
     }
+    
+    string path;
+    cin>>path;
+//    path = "/Users/huoteng/Desktop/test.txt";//for test
+    ifstream inputFile(path);
+//    if (!inputFile) {
+//        cout << "不可以打开文件" << endl;
+//        exit(1);
+//    }
     
     string dataStr;
     vector<Word> wordsVec;
@@ -50,20 +58,22 @@ int main(int argc, const char * argv[]) {
     while (inputFile>>dataStr) {
         transform(dataStr.begin(), dataStr.end(), dataStr.begin(), ::tolower);
         
-        if (wordsSet.find(dataStr) != wordsSet.end()) {
-            //word 在set中存在，vector中计数
-            for (int i = 0; i < wordsVec.size(); ++i) {
-                if (dataStr.compare(wordsVec[i].word) == 0) {
-                    wordsVec[i].appearNum++;
-                    break;
+        if (exclusionWords.find(dataStr) == exclusionWords.end()) {
+            if (wordsSet.find(dataStr) != wordsSet.end()) {
+                //word 在set中存在，vector中计数
+                for (int i = 0; i < wordsVec.size(); ++i) {
+                    if (dataStr.compare(wordsVec[i].word) == 0) {
+                        wordsVec[i].appearNum++;
+                        break;
+                    }
                 }
+            } else {
+                Word newWord;
+                newWord.word = dataStr;
+                newWord.appearNum = 1;
+                wordsSet.insert(dataStr);
+                wordsVec.insert(wordsVec.end(), newWord);
             }
-        } else {
-            Word newWord;
-            newWord.word = dataStr;
-            newWord.appearNum = 1;
-            wordsSet.insert(dataStr);
-            wordsVec.insert(wordsVec.end(), newWord);
         }
     }
     inputFile.close();

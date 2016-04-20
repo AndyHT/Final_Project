@@ -1,0 +1,46 @@
+//
+//  main.cpp
+//  homework4-3
+//
+//  Created by Teng on 4/17/16.
+//  Copyright © 2016 huoteng. All rights reserved.
+//
+
+#include <iostream>
+#include <iterator>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+
+using namespace std;
+
+int main(int argc, const char * argv[]) {
+    istream_iterator<int> eos;
+    istream_iterator<int> iit (cin);
+    vector<int> numbers;
+    while (iit != eos) {
+        numbers.insert(numbers.end(), *iit);
+        ++iit;
+    }
+    
+    ofstream output1("3_3_1out.txt");
+    ofstream output2("3_3_2out.txt");
+    
+    ostream_iterator<int> os1(output1," ");
+    ostream_iterator<int> os2(output2, "\n");
+    
+    vector<int> oddNumbers;
+    vector<int> otherNumbers;
+    for (int i = 0; i < numbers.size(); ++i) {
+        if (numbers[i]%2 == 1) {
+            oddNumbers.insert(oddNumbers.end(), numbers[i]);
+        } else {
+            otherNumbers.insert(otherNumbers.end(), numbers[i]);
+        }
+    }
+    
+    copy(oddNumbers.begin(), oddNumbers.end(), os1);
+    copy(otherNumbers.begin(), otherNumbers.end(), os2);
+    
+    return 0;
+}
