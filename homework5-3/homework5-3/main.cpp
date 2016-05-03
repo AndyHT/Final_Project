@@ -1,6 +1,6 @@
 //
 //  main.cpp
-//  homework5-2
+//  homework5-3
 //
 //  Created by Teng on 5/3/16.
 //  Copyright © 2016 huoteng. All rights reserved.
@@ -16,22 +16,13 @@ struct Coordination {
     int y;
 };
 
-int row, col;
+int row, col, num;
 char **square;
 int **routeSqure;
 bool thereIsCircle = false;
 vector<Coordination> route;
 
-bool hasCircle(int x, int y) {
-    for (int i = 0; i < route.size(); ++i) {
-        if (route[i].x == x && route[i].y == y) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void findCircle(int startX, int startY) {
+void setX(int startX, int startY) {
     routeSqure[startX][startY] = 1;
     Coordination first;
     first.x = startX;
@@ -39,12 +30,13 @@ void findCircle(int startX, int startY) {
     
     route.push_back(first);
     
+    int currentX = 0;
     
-    while (route.size() > 0) {
+    while (currentX < num) {
         Coordination current = route[route.size()-1];
         
         if (current.y > 0 && routeSqure[current.x][current.y-1] == -1) {
-            if (square[current.x][current.y-1] == square[current.x][current.y]) {
+            if (square[current.x][current.y-1] == '.') {
                 Coordination newPosition;
                 newPosition.x = current.x;
                 newPosition.y = current.y-1;
@@ -54,7 +46,7 @@ void findCircle(int startX, int startY) {
             }
         }
         if (current.x < row-1 && routeSqure[current.x+1][current.y] == -1) {
-            if (square[current.x+1][current.y] == square[current.x][current.y]) {
+            if (square[current.x+1][current.y] == '.') {
                 Coordination newPosition;
                 newPosition.x = current.x+1;
                 newPosition.y = current.y;
@@ -64,7 +56,7 @@ void findCircle(int startX, int startY) {
             }
         }
         if (current.y < col-1 && routeSqure[current.x][current.y+1] == -1) {
-            if (square[current.x][current.y+1] == square[current.x][current.y]) {
+            if (square[current.x][current.y+1] == '.') {
                 Coordination newPosition;
                 newPosition.x = current.x;
                 newPosition.y = current.y+1;
@@ -74,7 +66,7 @@ void findCircle(int startX, int startY) {
             }
         }
         if (current.x > 0 && routeSqure[current.x-1][current.y] == -1) {
-            if (square[current.x-1][current.y] == square[current.x][current.y]) {
+            if (square[current.x-1][current.y] == '.') {
                 Coordination newPosition;
                 newPosition.x = current.x-1;
                 newPosition.y = current.y;
@@ -84,87 +76,89 @@ void findCircle(int startX, int startY) {
             }
         }
         
-        // 如果走不通，遍历route
-        if (route.size() > 3) {
-            Coordination now = route[route.size()-1];
-            Coordination last = route[route.size()-2];
-            if (now.y > 0 && (now.x != last.x && now.y-1 != last.y)) {
-                if (hasCircle(now.x, now.y-1)) {
-                    thereIsCircle = true;
-                    return;
-                }
-            }
-            if (now.x < row-1 && (now.x+1 != last.x && now.y != last.y)) {
-                if (hasCircle(now.x+1, now.y)) {
-                    thereIsCircle = true;
-                    return;
-                }
-            }
-            if (now.y < col-1 && (now.x != last.x && now.y+1 != last.y)) {
-                if (hasCircle(now.x, now.y+1)) {
-                    thereIsCircle = true;
-                    return;
-                }
-            }
-            if (now.x > 0 && (now.x-1 != last.x && now.y != last.y)) {
-                if (hasCircle(now.x-1, now.y)) {
-                    thereIsCircle = true;
-                    return;
-                }
-            }
-            route.pop_back();
-            continue;
-        } else {
-            route.pop_back();
-            continue;
-        }
+        // 如果走不通，填X
+//        if (route.size() > 3) {
+//            Coordination now = route[route.size()-1];
+//            Coordination last = route[route.size()-2];
+//            if (now.y > 0 && (now.x != last.x && now.y-1 != last.y)) {
+//                if (hasCircle(now.x, now.y-1)) {
+//                    thereIsCircle = true;
+//                    return;
+//                }
+//            }
+//            if (now.x < row-1 && (now.x+1 != last.x && now.y != last.y)) {
+//                if (hasCircle(now.x+1, now.y)) {
+//                    thereIsCircle = true;
+//                    return;
+//                }
+//            }
+//            if (now.y < col-1 && (now.x != last.x && now.y+1 != last.y)) {
+//                if (hasCircle(now.x, now.y+1)) {
+//                    thereIsCircle = true;
+//                    return;
+//                }
+//            }
+//            if (now.x > 0 && (now.x-1 != last.x && now.y != last.y)) {
+//                if (hasCircle(now.x-1, now.y)) {
+//                    thereIsCircle = true;
+//                    return;
+//                }
+//            }
+//            route.pop_back();
+//            continue;
+//        } else {
+//            route.pop_back();
+//            continue;
+//        }
+        Coordination last = route[route.size()-1];
+        route.pop_back();
+        square[last.x][last.y] = 'X';
+        currentX++;
     }
 }
 
-bool thereIsUnVisitedPosition() {
+
+
+Coordination findStart() {
+    Coordination find;
+
     for (int i = 0; i < row; ++i) {
         for (int j = 0; j < col; ++j) {
-            if (routeSqure[i][j] == -1) {
-                return true;
+            if (square[i][j] == '.') {
+                find.x = i;
+                find.y = j;
+                break;
             }
         }
     }
-    
-    return false;
+    return find;
 }
-
 
 int main() {
     
-    cin >> row >> col;
+    cin >> row >> col >> num;
     
     square = new char*[row];
     routeSqure = new int*[row];
-
+    
     for (int i = 0; i < row; ++i) {
         square[i] = new char[col];
         routeSqure[i] = new int[col];
-
+        
         for (int j = 0; j < col; ++j) {
             cin >> square[i][j];
             routeSqure[i][j] = -1;
         }
     }
     
-    while (thereIsUnVisitedPosition()) {
-        for (int i = 0; i < row; ++i) {
-            for (int j = 0; j < col; ++j) {
-                if (routeSqure[i][j]) {
-                    findCircle(i, j);
-                }
-            }
-        }
-    }
+    Coordination start = findStart();
+    setX(start.x, start.y);
     
-    if (thereIsCircle) {
-        cout << "Yes" <<endl;
-    } else {
-        cout << "No" <<endl;
+    for (int i = 0; i < row; ++i) {
+        for (int j = 0; j < col; ++j) {
+            cout << square[i][j];
+        }
+        cout <<endl;
     }
     
     return 0;
