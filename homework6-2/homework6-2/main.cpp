@@ -67,11 +67,7 @@ public:
     }
     
     Matrix& operator+=(const Matrix& anotherMatrix) {
-        for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                matrix[i][j] += anotherMatrix.matrix[i][j];
-            }
-        }
+        add(anotherMatrix);
         
         return *this;
     }
@@ -80,7 +76,7 @@ public:
         return matrix[row][column];
     }
     
-    float operator()(int row, int column) const {
+    float operator() (int row, int column) const {
         return matrix[row][column];
     }
 private:
